@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="js/jquery.min.js"></script>
+</head>
+<body>
+<!--弹出窗口-->
+<div>
+
+    <form id="form_commodity" class="form-group">
+
+        <div style="margin-bottom: 20px " class="input-group">
+            <span class="input-group-addon">图片</span>
+            <input   name="f1" type="file"  class="form-control"/>
+        </div>
+    </form>
+    <div>
+        <button class="btn btn-success btn-block" onclick="commodity_save()">保存</button>
+    </div>
+
+</div>
+
+<script>
+
+    function commodity_save() {
+        var data=new FormData(document.getElementById("form_commodity"));
+        alert(data);
+        $.ajax({
+            url:"addCommodity",
+            method:"post",
+            data:data,
+            contentType:false,
+            processData:false,
+            success:function (d) {
+                alert(d);
+            }
+        });
+    }
+
+</script>
+</body>
+</html>

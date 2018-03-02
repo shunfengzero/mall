@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.test.dao.CategoryDao">
+
+    <select id="findAllCategory" resultType="com.test.entity.Category">
+        select * from category
+    </select>
+
+
+    <select id="findCategoryByPId" parameterType="java.lang.Integer" resultType="com.test.entity.Category" >
+        select * from category where parentId = #{pid}
+    </select>
+
+    <insert id="saveCategory" parameterType="com.test.entity.Category">
+        insert into category(name,parentId) values(#{name},#{parentId});
+    </insert>
+
+    <update id="updateCategory" parameterType="com.test.entity.Category">
+        update category set name=#{name},parentId=#{parentId} where id=#{id};
+    </update>
+
+    <!-- 删除-->
+    <delete id="deleteCategory" parameterType="list">
+        delete from category where id in
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

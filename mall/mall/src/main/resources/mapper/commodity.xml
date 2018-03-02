@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.test.dao.CommodityDao">
+    <!--所有商品-->
+    <select id="findAllComms" resultType="com.test.entity.Commodity">
+        select * from commodity
+    </select>
+    <!--根据sku获取商品-->
+    <select id="shangjia" resultType="com.test.entity.Commodity">
+        select * from commodity where sku=#{sku}
+    </select>
+    <!--添加-->
+    <insert id="addCommodity" parameterType="map">
+        insert into commodity values(#{sku},#{name},#{price},2)
+    </insert>
+</mapper>

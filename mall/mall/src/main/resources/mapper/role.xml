@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.test.dao.RoleDao">
+
+    <resultMap type="com.test.entity.Role" id="roleMapper">
+        <!-- 主键 -->
+        <id property="rid" column="rid"/>
+        <!-- 其他字段 -->
+        <result property="rname" column="rname" />
+    </resultMap>
+
+
+    <select id="findAllRole" resultType="com.test.entity.Role">
+        select * from role
+    </select>
+
+    <select id="findAllRoleByUid" parameterType="com.test.entity.User" resultType="com.test.entity.Role">
+        select r.* from role r left join user_role ur on ur.rid = r.rid where ur.uid = #{id};
+    </select>
+
+    <insert id="saveRole" parameterType="com.test.entity.Role" >
+        insert into role(rname) values(#{rname})
+
+    </insert>
+
+    <update id="updateRole" parameterType="com.test.entity.Role">
+        update role set rname = #{rname} where rid=#{rid}
+    </update>
+
+    <delete id="deleteRole" parameterType="list">
+        delete from role where rid in
+        <foreach collection="list" item="rid" open="(" close=")" separator=",">
+            #{rid}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteOld">
+        delete from role_res where rid=#{rid}
+    </delete>
+    <insert id="fenpei" parameterType="map">
+        insert into role_res(rid,resid) VALUES
+        <foreach collection="ps" item="x" separator=",">
+            (#{rid},#{x})
+        </foreach>
+    </insert>
+
+</mapper>

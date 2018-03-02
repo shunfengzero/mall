@@ -1,0 +1,165 @@
+
+
+    <div id="category_grid"></div>
+    <div id="window_category_add" class="easyui-window" data-options="closed:true,modal:true" style="width: 300px;height: 400px">
+        <form id="form_category_add" action="saveCategory">
+            <input   type="hidden" name="id" />
+            <input  type="hidden" name="parentId"/>
+            名称:<input  type="text" name="name" class="textbox"/><br />
+        </form>
+
+        <div >
+            <button  onclick="save_Category()">保存</button>
+        </div>
+    </div>
+
+
+    <script>
+        function category_init() {
+            $("#category_grid").treegrid({
+                title:"类别管理",
+                method:"get",
+                idField:"id",
+                treeField:"name",
+                singleSelect : false,
+                columns:[[
+                    {field:"id",checkbox:true},
+                    {field:"name",title:"名称",width:200},
+                    {field:"_parentId",title:"父节点",width:200}
+                ]],
+                toolbar:[
+                    {text:"添加",iconCls:"icon-add",handler:
+                        function () {
+                            toAddCategory() ;
+                        }},
+                    {text:"修改",iconCls:"icon-edit",handler:function(){toEditCategory();}},
+                    {text:"删除",iconCls:"icon-remove",handler:function(){delCategory();}},
+                ]
+            });
+            findAllCategory();
+
+        }
+
+        function findAllCategory() {
+            $.get("findAllCategory",function(data) {
+
+                var a = {rows:data};
+                var b = JSON.stringify(a);
+
+                //正则
+                var p1 = /parentId/g;
+                var c = b.replace(p1,"_parentId");
+
+                var p2 = /"_parentId":0/g;
+                var d = c.replace(p2,"\"root\":0");
+                var e = JSON.parse(d);
+                $("#category_grid").treegrid("loadData",e);
+
+            });
+        }
+
+        category_init();
+
+        //去添加类别
+        function toAddCategory() {
+            var parent = $("#category_grid").treegrid("getSelected");
+            if (parent) {
+
+                $("#form_category_add").form("load",{
+                    id:parent.id,
+                    name:"",
+                    parentId:-1
+                });
+
+                $("#window_category_add").window("open");
+
+            } else {
+                $("#form_category_add").form("load",{
+                    //id:-1表示没有父节点
+                    id:-1,
+                    name:"",
+                    parentId:-1
+                });
+
+                $("#window_category_add").window("open");
+            }
+        }
+
+        //去修改
+       function  toEditCategory() {
+           var cate = $("#category_grid").treegrid("getSelected");
+            var parentId2;
+           if (cate) {
+
+               if (cate._parentId == undefined) {
+                   parentId2 = 0;
+               } else {
+                   parentId2 = cate._parentId;
+               }
+
+               $("#form_category_add").form("load", {
+                   id:cate.id,
+                   name:cate.name,
+                   parentId:parentId2
+               });
+               $("#category_grid").treegrid("reload");
+               $("#window_category_add").window("open");
+           } else {
+               $.messager.alert("系统提示","请选择一条数据");
+           }
+        }
+
+        function save_Category() {
+
+            $("#form_category_add").form("submit",{
+                    success:function (data) {
+                       category_init();
+                        //$("#category_grid").treegrid("reload");
+                        $("#window_category_add").window("close");
+                    }
+                }
+
+            )
+        }
+
+     function delCategory() {
+         var cates = $("#category_grid").treegrid("getSelections");
+
+         if (cates.length == 0) {
+
+             $.messager.alert("系统提示","请选择要删除的数据");
+
+
+         } else {
+
+
+             var cat = [];
+             for (var i = 0; i < cates.length; i++) {
+                 cat[i] = cates[i].id
+             }
+
+             var json  = JSON.stringify(cat);
+             $.ajax({
+                 url:"deleteCategory",
+                 method:"post",
+                 data:json,
+                 contentType:"application/json",
+                 success:function(data) {
+                     category_init();
+                     /*$("#res_grid").datagrid("reload");*/
+
+                 }
+
+             })
+         }
+     }
+
+    </script>
+
+
+
+
+
+
+
+

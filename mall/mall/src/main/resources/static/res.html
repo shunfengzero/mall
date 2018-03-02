@@ -1,0 +1,149 @@
+
+
+
+
+    <div id="res_grid"></div>
+    <div id="window_ress_add" class="easyui-window" data-options="closed:true,modal:true" style="width: 300px;height: 400px">
+        <form id="form_ress_add" action="saveRess">
+            <input   type="hidden" name="id" />
+            名称:<input  type="text" name="text" class="textbox"/><br />
+            路径:<input  type="text" name="url" class="textbox"/><br />
+         <input  type="hidden" name="parentId"/>
+        </form>
+
+        <div >
+            <button  onclick="save_Ress()">保存</button>
+        </div>
+    </div>
+
+
+
+    <script>
+        function res_init() {
+            $("#res_grid").treegrid({
+                title:"资源管理",
+                url:"findRes",
+                method:"get",
+                idField:"id",
+                treeField:"text",
+                singleSelect : false,
+                columns:[[
+                    {field:"id",title:"序号",width:100,checkbox:true},
+                    {field:"text",title:"名称",width:100},
+                    {field:"url",title:"路径",width:100},
+                    {field:"_parentId",title:"父节点",width:100}
+
+                ]],
+                toolbar:[
+                    {text:"添加",iconCls:"icon-add",handler:function(){toRess();}},
+                    {text:"修改",iconCls:"icon-edit",handler:function(){toEditRess();}},
+                    {text:"删除",iconCls:"icon-remove",handler:function(){delRess();}},
+
+                ]
+
+            })
+        }
+        res_init();
+
+        //去添加
+        function toRess() {
+            var parent = $("#res_grid").treegrid("getSelected");
+
+            if (parent) {
+
+                $("#form_ress_add").form("load",{
+                    id:parent.id,
+                    text:"",
+                    url:"",
+                    parentId:-1
+                });
+
+                $("#window_ress_add").window("open");
+
+            } else {
+
+                $("#form_ress_add").form("load",{
+                    //id:-1表示没有父节点
+                    id:-1,
+                    text:"",
+                    url:"",
+                    parentId:-1
+                });
+
+                $("#window_ress_add").window("open");
+
+
+            }
+
+        }
+        //去修改
+        function toEditRess() {
+            var ress = $("#res_grid").treegrid("getSelected");
+
+            if (ress) {
+
+                $("#form_ress_add").form("load", {
+                    id:ress.id,
+                    text:ress.text,
+                    url:ress.url,
+                    parentId:ress._parentId
+                })
+                $("#res_grid").treegrid("reload");
+                $("#window_ress_add").window("open");
+            } else {
+                $.messager.alert("系统提示","请选择一条数据");
+            }
+
+
+        }
+
+        //添加权限
+        function save_Ress() {
+
+
+
+            $("#form_ress_add").form("submit",{
+                    success:function (data) {
+                        $("#res_grid").treegrid("reload");
+                        $("#window_ress_add").window("close");
+                    }
+                }
+
+            )
+        }
+        //删除
+        function delRess() {
+            var re = $("#res_grid").treegrid("getSelections");
+
+            if (re.length == 0) {
+
+                $.messager.alert("系统提示","请选择要删除的数据");
+
+
+            } else {
+
+
+                var res = [];
+                for (var i = 0; i < re.length; i++) {
+                    res[i] = re[i].id
+                }
+
+                var json  = JSON.stringify(res);
+                $.ajax({
+                    url:"deleteRess",
+                    method:"post",
+                    data:json,
+                    contentType:"application/json",
+                    success:function(data) {
+                        res_init();
+                        /*$("#res_grid").datagrid("reload");*/
+
+                    }
+
+                })
+            }
+
+        }
+
+
+    </script>

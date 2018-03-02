@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.test.dao.ResDao">
+    <resultMap id="m1" type="com.test.entity.Res">
+        <result property="id" column="id" />
+        <result property="text" column="text" />
+        <collection property="children" javaType="com.test.entity.Res">
+            <result property="id" column="x_id"/>
+            <result property="text" column="x_text" />
+            <result property="url" column="x_url" />
+        </collection>
+    </resultMap>
+
+    <select id="findAllRes" resultMap="m1" parameterType="com.test.entity.User">
+
+select r.id,r.text,x.id as x_id, x.text as x_text,x.url as x_url from ress r
+left join ress x ON x.parentId = r.id
+ left join role_res rr on rr.resid=r.id
+ left join user_role ur ON
+ur.rid = rr.rid
+where ur.uid=#{id} and r.parentid=0
+
+</select>
+
+
+    <select id="findRoleResByRoleId" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+
+        select resid from role_res  where rid = #{rid};
+
+
+    </select>
+
+    <select id="findAllResForRole" resultMap="m1" >
+
+        select r.id,r.text,x.id as x_id,x.text as x_text,x.url as x_url from ress r
+        left join ress x ON x.parentId = r.id
+
+        where r.parentid=0
+
+    </select>
+
+    <select id="findRes" resultType="com.test.entity.Res" >
+          select * from ress
+    </select>
+
+    <select id="findResById" parameterType="java.lang.Integer" resultType="com.test.entity.Res" >
+        select * from ress where id = #{id}
+    </select>
+
+    <select id="findResByPId" parameterType="java.lang.Integer" resultType="com.test.entity.Res" >
+        select * from ress where parentId = #{pid}
+    </select>
+
+
+    <insert id="saveRess" parameterType="com.test.entity.Res">
+        insert into ress(text,url,parentId) values(#{text},#{url},#{parentId});
+    </insert>
+
+    <update id="updateRess" parameterType="com.test.entity.Res">
+        update ress set text=#{text},url=#{url},parentId=#{parentId} where id=#{id};
+    </update>
+
+   <!-- 删除资源-->
+    <delete id="deleteRess" parameterType="list">
+        delete from ress where id in
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+
+</mapper>

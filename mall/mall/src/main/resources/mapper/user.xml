@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+    <!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    <mapper namespace="com.test.dao.UserDao">
+
+    <resultMap id="userMapper" type="com.test.entity.User" >
+        <!-- 主键 -->
+        <id property="id" column="id"/>
+        <!-- 其他字段 -->
+        <result property="account" column="account" />
+        <result property="pwd" column="pwd" />
+       <collection property="role" javaType="list" ofType="com.test.entity.Role">
+            <result property="rname" column="rr" />
+           <result property="rid" column="ra" />
+        </collection>
+
+      <!--  <collection property="userRole" javaType="string" ofType="com.test.entity.UserRole">
+            <result property="role.rname" column="rr" />
+            &lt;!&ndash; <result property="user" column="user.id" />&ndash;&gt;
+            &lt;!&ndash; <result property="user" column="user.account" />
+             <result property="role" column="role.rname" />&ndash;&gt;
+        </collection>
+-->
+    </resultMap>
+
+    <!--查询所有用户方法1-->
+    <select id="findAllUser3" resultMap="userMapper">
+      select u.* ,r.rname as rr,r.rid as ra from user u left join user_role ur on ur.uid= u.id left join role r on r.rid=ur.rid
+    limit #{start},#{size};
+    </select>
+    <!--查询长度-->
+    <select id="getCount" resultType="int">
+       /*select count(account) from user u left join user_role ur on ur.uid= u.id left join role r on r.rid=ur.rid;
+*/
+    select count(account) from user
+    </select>
+
+    <!--方法2 -->
+    <select id="findAllUser2" resultType="com.test.entity.User">
+        select u.* ,r.rname from user u left join user_role ur on ur.uid= u.id left join role r on r.rid=ur.rid
+        limit #{start},#{size};
+
+    </select>
+
+
+    <!--查询所有用户 方法3-->
+    <select id="findAllUser" resultType="map">
+         select user.id,user.account ,role.rname from user  left join user_role ur on ur.uid = user.id left join role  on role.rid = ur.rid
+          limit #{start},#{size};
+    </select>
+    <insert id="saveUser" parameterType="com.test.entity.User">
+        insert into user(account,pwd) values(#{account},#{pwd});
+    </insert>
+
+    <update id="updateUser" parameterType="com.test.entity.User">
+
+        update user set account=#{account}, pwd=#{pwd} where id=#{id}
+    </update>
+
+    <!--删除用户 方法1-->
+    <!--<delete id="delUser" parameterType="java.lang.Integer" >
+        delete from user where id  in <foreach collection="list" item="id" index="index" open="(" close=")" separator=","> #{id}
+    </foreach>
+    </delete>-->
+
+    <delete id="delUser" parameterType="list">
+        delete from user where id in
+        <foreach collection="list" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="login" parameterType="com.test.entity.User" resultType="com.test.entity.User">
+        SELECT * from user where account=#{account} and pwd=#{pwd};
+    </select>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

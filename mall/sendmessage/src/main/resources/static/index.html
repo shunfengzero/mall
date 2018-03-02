@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="js/jquery.js"></script>
+</head>
+<body>
+
+<form onsubmit="return false;">
+
+    手机号:<input id="phone"  type="text" name="phone"/><br />
+    验证码:<input type="text" id="code" name="code" />
+    <input type="hidden" id="hiddenCode" name="code2" />
+
+</form>
+<div>
+    <button onclick="getCode()">获取验证码</button>
+    <button onclick="login()">登录</button>
+</div>
+
+<script>
+
+    function code() {
+        var cd = "";
+        for (var i = 0; i < 6; i++) {
+            cd +=  Math.floor(Math.random() * 9+1);
+        }
+        return cd;
+
+    }
+
+   function getCode() {
+
+      var c = code();
+       alert(c);
+      $.ajax({
+            url:"getCode",
+            method:"post",
+            data:{"phone":$("#phone").val(),"code":c},
+            dataType:"json",
+            success:function(data) {
+                alert(data);
+                $("#hiddenCode").val(c)
+            }
+
+        })
+    }
+
+    function login() {
+      var nc =  $("#hiddenCode").val();
+      var ic = $("#code").val();
+      alert(ic);
+        alert(nc);
+      if (nc == ic) {
+          alert("登录成功");
+      } else {
+          alert("登录失败");
+      }
+
+    }
+
+</script>
+
+</body>
+</html>

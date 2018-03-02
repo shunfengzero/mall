@@ -1,0 +1,160 @@
+
+
+    <div id="first_Role"></div>
+    <div id="window_role_add" class="easyui-window" data-options="closed:true,modal:true" style="width: 300px;height: 400px">
+        <form id="form_role_add" action="saveRole">
+            <input   type="hidden" name="rid" />
+            <input  type="text" name="rname" class="textbox"/>
+
+        </form>
+
+        <div >
+            <button  onclick="save_Role()">保存</button>
+        </div>
+    </div>
+
+    <div id="window_role_fenpei" class="easyui-window" data-options="closed:true,modal:true" style="width: 300px;height: 400px">
+
+        <div>
+            <ul id="role_tree"  class="easyui-tree">
+
+            </ul>
+        </div>
+
+        <div >
+            <button  onclick="role_fenpei()">分配</button>
+        </div>
+    </div>
+
+
+<script>
+
+    function findAllResForRole(rid) {
+    $('#role_tree').tree({
+            url:"findRoleResByRoleId?rid=" + rid,
+        checkbox:true
+    })
+}
+
+
+    function init_Role() {
+        $("#first_Role").datagrid({
+            title:"角色管理",
+            url:"findAllRole",
+            method:"get",
+            columns:[[
+                {field:"rid",checkbox:true},
+                {field:"rname",title:"角色",width:200}
+
+            ]],
+            toolbar:[
+                {text:"添加",iconCls:"icon-add",handler:function(){toRole();}},
+                {text:"修改",iconCls:"icon-edit",handler:function(){toEditRole();}},
+                {text:"删除",iconCls:"icon-remove",handler:function(){delRoles();}},
+                {text:"分配权限",iconCls:"icon-search",handler:function(){toFenpei();}}
+            ]
+
+        });
+    }
+    init_Role();
+
+    function toRole() {
+        $("#form_role_add").form("load",{
+            rid:0,
+            rname:""
+        })
+
+        $("#window_role_add").window("open");
+    }
+
+    function save_Role() {
+        $("#form_role_add").form("submit",{
+                success:function (data) {
+                    $("#first_Role").datagrid("reload");
+                    $("#window_role_add").window("close");
+                }
+            }
+
+        )
+    }
+
+    function toEditRole() {
+        var role = $("#first_Role").datagrid("getSelected");
+        if (role) {
+
+            $("#form_role_add").form("load", {
+                rid:role.rid,
+                rname:role.rname
+            })
+
+            $("#window_role_add").window("open");
+        } else {
+            $.messager.alert("系统提示","请选择一条数据");
+        }
+    }
+
+    function  delRoles() {
+
+        var roles = $("#first_Role").datagrid('getSelections');
+
+        if (roles.length == 0) {
+            $.messager.alert("系统提示","请选择要删除的数据");
+        } else {
+
+        var ars=[];
+        for (var i = 0; i < roles.length; i++) {
+
+            ars[i] = roles[i].rid;
+
+        }
+        var json = JSON.stringify(ars);
+
+        $.ajax({
+            url:"deleteRole",
+            method:"post",
+            data:json,
+            contentType:"application/json",
+            success:function(data) {
+                $("#first_Role").datagrid("reload");
+            }
+
+        })
+        }//else
+    }
+    //去分配权限
+    function toFenpei() {
+        var role = $('#first_Role').datagrid("getSelected");
+        findAllResForRole(role.rid);
+        $("#window_role_fenpei").window("open");
+
+    }
+
+
+
+    function role_fenpei() {
+        //角色
+        var role = $("#first_Role").datagrid("getSelected");
+        //资源
+        var rs = $("#role_tree").tree("getChecked");
+        var as = [role.rid];
+        for (var i=0;i<rs.length;i++) {
+            as[i+1]=rs[i].id;
+
+        }
+        var json = JSON.stringify(as);
+
+        $.ajax({
+            url:"fenpei",
+            method:"post",
+            data:json,
+            contentType:"application/json",
+            success:function(d){
+                $("#first_Role").datagrid("reload");
+                $("#window_role_fenpei").window("close");
+            }
+
+        });
+
+    }
+
+</script>

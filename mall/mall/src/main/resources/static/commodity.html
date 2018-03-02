@@ -1,0 +1,70 @@
+
+    <script>
+        function commodity_init() {
+            $("#commodity_grid").datagrid({
+                title:"商品管理",
+                url:"findAllComms",
+                columns:[[
+                    {field:"sku",checkbox:true},
+                    {field:"name",title:"名称",width:200}
+                ]],
+                toolbar:[
+                    {text:"添加",iconCls:"icon-add",handler:function () {
+                        toAddCommodity();
+                    }},
+                    {text:"上架",iconCls:"icon-search",handler:function () {
+                        shangjia();
+                    }}
+                ]
+            });
+        }
+        $(commodity_init);
+        function toAddCommodity() {
+            $("#window_commodity_add").window("open");
+        }
+        function commodity_save() {
+             var data=new FormData(document.getElementById("form_commodity"));
+             alert(data);
+             $.ajax({
+                 url:"addCommodity",
+                 method:"post",
+                 data:data,
+                 contentType:false,
+                 processData:false,
+                 success:function (d) {
+                     alert(d);
+                 }
+             });
+        }
+//        上架
+        function shangjia() {
+           var comm= $("#commodity_grid").datagrid("getSelected");
+           $.get("shangjia",{sku:comm.sku},function (d) {
+               alert(d);
+           });
+        }
+    </script>
+
+   <div id="commodity_grid"></div>
+   <!--弹出窗口-->
+   <div id="window_commodity_add" class="easyui-window" data-options="closed:true,modal:true" style="padding:30px 30px;width:100%;height:600px;display: flex;flex-flow:column;">
+
+           <form id="form_commodity" class="form-group">
+               <div style="margin-bottom: 20px " class="input-group">
+                   <span class="input-group-addon">名称</span>
+                   <input id="account" name="name" class="form-control" placeholder="请输入账号"/>
+               </div>
+               <div style="margin-bottom: 20px " class="input-group">
+                   <span class="input-group-addon">价格</span>
+                   <input id="pwd" name="price"  class="form-control"/>
+               </div>
+               <div style="margin-bottom: 20px " class="input-group">
+                   <span class="input-group-addon">图片</span>
+                   <input   name="f1" type="file"  class="form-control"/>
+               </div>
+           </form>
+           <div>
+               <button class="btn btn-success btn-block" onclick="commodity_save()">保存</button>
+           </div>
+
+   </div>

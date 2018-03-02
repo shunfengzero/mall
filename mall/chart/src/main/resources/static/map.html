@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=Z1Zkzkm5ULjbYoGZKfWp7eknFhcirSCS">
+        //v2.0版本的引用方式：src="http://api.map.baidu.com/api?v=2.0&ak=您的密钥"
+    </script>
+    <script>
+        var map;
+        function show(p) {
+            map = new BMap.Map("first");
+            //指定地图中心经纬度
+            var point = new BMap.Point(113.65,34.76);
+            if (p) {
+                point = new BMap.Point(p.point.lng,p.point.lat);
+            }
+            //比例尺
+            map.centerAndZoom(point,10);
+        }
+        function local() {
+            //定位
+            var x = new BMap.Geolocation();
+            //当前位置
+            x.getCurrentPosition(function (data) {
+                show(data);
+                address(data);
+            })
+
+        }
+
+        function address(p) {
+            var adr = new BMap.Geocoder();
+            var c=new BMap.Point(p.point.lng,p.point.lat);
+            //行政位置
+            adr.getLocation(c,function (data) {
+               alert(data.address);
+            });
+
+        }
+    function  search() {
+       var a = new BMap.LocalSearch(map,{
+          renderOptions:{map:map,autoViewport:true}
+       });
+            a.searchNearby("川菜","纬五路");
+    }
+
+    function nav() {
+        var a = new BMap.WalkingRoute(map,{
+           renderOptions:{map:map,autoViewport:true}
+        });
+        a.search("人民公园","紫荆山公园");
+
+    }
+
+    </script>
+
+</head>
+
+
+
+<body>
+    <div id="first" style="width: 800px;height: 500px"></div>
+    <button onclick="show()">地图</button>
+    <button onclick="local()">定位</button>
+    <button onclick="search()">搜索</button>
+    <button onclick="nav()">导航</button>
+</body>
+</html>

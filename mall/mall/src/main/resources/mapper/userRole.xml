@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.test.dao.UserRoleDao">
+
+   <!-- <resultMap id="userRoleMapper" type="com.test.entity.UserRole">
+
+        <id property="urId" column="urId"/>
+
+        <association property="user" resultMap="com.test.entity.User.userMapper" ></association>
+        <association property="role" resultMap="com.test.entity.Role.roleMapper" ></association>
+    </resultMap>-->
+
+    <insert id="assignUserRoles1" parameterType="java.util.Map">
+        insert into user_role (uid,rid) values(#{uid},#{rid});
+
+    </insert>
+
+    <insert id="assignUserRoles" parameterType="java.util.Map">
+        insert into user_role (uid,rid) values
+        <foreach collection="rids" item="id"  separator=",">
+            (#{uid},#{id})
+        </foreach>
+
+    </insert>
+    <delete id="deleteURId" parameterType="java.lang.Integer">
+        delete from user_role where uid = #{uid}
+    </delete>
+
+    <select id="findAllUserRole" parameterType="com.test.entity.UserRole" resultType="java.lang.Integer">
+        select ur.rid from user_role ur where uid=#{user.id};
+    </select>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

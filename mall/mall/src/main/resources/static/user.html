@@ -1,0 +1,328 @@
+
+
+    <div id="first_User"></div>
+    <div id="window_user_add" class="easyui-window" data-options="closed:true,modal:true" style="width: 300px;height: 400px">
+        <form id="form_user_add" action="saveUser">
+            <input type="hidden" name="id">
+            <input name="account" class="textbox"/>
+            <input name="pwd" type="password"/>
+        </form>
+
+        <div >
+            <button onclick="save_User()">保存</button>
+        </div>
+    </div>
+
+
+   <div id="window_role_assign" class="easyui-window" data-options="closed:true,modal:true" style="width: 300px;height: 400px">
+
+       <!-- <form id="form_role_assign" action="assignUserRoles">
+            <input id="userIda" type="hidden" name="id">
+            <input id="userAss"  name="account" />
+            <input id="role_assign" class="easyui-combobox" name="rid" data-options="checkbox:true"/>
+
+        </form>-->
+
+       <form id="form_role_assign" action="assignUserRoles">
+           <input id="userIda" type="hidden" name="id">
+           账号:<input id="userAss"  name="account" />
+       </form>
+           <div id="second_role">
+
+           </div>
+
+
+
+        <div >
+            <button onclick="assign_Role()">分配角色</button>
+        </div>
+    </div>
+
+
+
+<script>
+    var countUser=0;
+    var srid="";
+    function getCount() {
+        $.get("getCount", function(count){
+            countUser = count;
+
+        })
+
+    }
+    function assign2_role() {
+        $("#second_role").datagrid({
+            title:"角色管理",
+            url:"findAllRole",
+            method:"get",
+            columns:[[
+                {field:"rid",checkbox:true},
+                {field:"rname",title:"角色",width:200}
+
+            ]]
+    })
+    }
+   // getCount();
+    function init_user() {
+        $("#first_User").datagrid({
+            title:"用户管理",
+           url:"findAllUser",
+            method:"get",
+            pagination:true,
+            columns:[[
+                {field:"id",checkbox:true},
+                {field:"account",title:"账号",width:200},
+                {field:"role.rname",title:"角色",width:200, formatter:rolesAll}
+            ]],
+            toolbar:[
+                {text:"添加",iconCls:"icon-add",handler:function(){toUser();}},
+                {text:"修改",iconCls:"icon-edit",handler:function(){toEditUser();}},
+                {text:"删除",iconCls:"icon-remove",handler:function(){delUsers();}},
+                {text:"分配角色",iconCls:"icon-remove",handler:function(){toAssignRoles();}}
+            ],
+            loading:true,
+            pagination: true,
+            pageSize: 5,
+            pageNumber: 1,
+            pageList: [1, 5, 10, 15]
+
+        });
+
+        //返回datagrid的分页对象
+        var $page = $("#first_User").datagrid("getPager");
+
+        $page.pagination({
+            showPageList: true
+
+        });
+
+        //加载loadUser
+       //loadUser(1,5);
+
+
+
+    }
+
+     function rolesAll(value, row,index) {
+
+        var jj = row.role;
+
+        var a = "";
+        role_id = "";
+        $(jj).each(function() {
+
+            a += this.rname + ",";
+        })
+
+        return a;
+
+    }
+
+    function role_assign_combox() {
+        $('#role_assign').combobox({
+            url:'findAllRole',
+            multiple:true,
+            panelHeight:'auto',
+            valueField:'rid',
+            textField:'rname'
+        });
+    }
+
+    /*function loadUser(page,size) {
+        $.get("findAllUser",{page:page,size:size},function(data){
+            $("#first_User").datagrid("loadData",data);
+            var pager=$("#first_User").datagrid("getPager");
+            pager.pagination({
+                loading:true,
+                total:countUser,
+                pageNumber:page,
+                pageSize:size,
+                pageList:[5,10,15],
+                onSelectPage:function(a,b) {
+                    loadUser(a,b);
+                }
+
+            })
+        });
+    }*/
+
+
+
+    //页面渲染完毕再调用
+    init_user();
+    function toUser() {
+        $("#form_user_add").form("load",{
+            id:0,
+            account:"",
+            pwd:""
+        })
+        $("#window_user_add").window("open");
+    }
+
+    function save_User(){
+
+        $("#form_user_add").form("submit",{
+            success:function(d) {
+               // getCount();
+                init_user();
+               //$("#first_User").datagrid("reload");
+                $("#window_user_add").window("close");
+            }
+        })
+    }
+
+    //删除用户
+    function delUsers() {
+        var rows = $('#first_User').datagrid('getSelections');
+
+        if (rows.length == 0) {
+            $.messager.alert("系统提示","请选择要删除的数据");
+        } else {
+
+
+
+        // var ids = ""; 方法1
+        var ars=[];// 方法2
+        for(var i=0; i<rows.length; i++){
+
+            //ids +=  rows[i].id + ","; //方法1
+            //alert(ids);
+
+            ars[i] = rows[i].id; //方法2
+        }
+        //转化为json
+        var json = JSON.stringify(ars); //方法2
+
+        $.ajax({
+            method:"post",
+            //type:"post",
+            url:"delUser",
+            // data:{"ids":ids},
+            data:json,
+            //dataType:"json",
+            contentType:"application/json",
+            success:function(data) {
+                //getCount();
+                init_user();
+                //$("#first_User").datagrid("reload");
+            }
+
+        })
+        }
+
+    }
+    /*修改用户信息*/
+    function toEditUser() {
+        //获取要修改的数据
+        var user = $('#first_User').datagrid('getSelected');
+
+        if (user) {
+
+            $("#form_user_add").form("load",{
+                id:user.id,
+                account:user.account,
+                pwd:user.pwd
+            });
+
+
+            $("#window_user_add").window("open");
+        } else {
+            $.messager.alert("系统提示","请选择一条数据");
+        }
+    }
+
+    function findUserRoleById(uid) {
+        alert(1);
+        $.ajax({
+            url:"findAllRoleByUid",
+            method:"post",
+            data:{"id":uid},
+            dataType:"json",
+            success:function(data) {
+
+                var rd = "";
+
+                $(data).each(function(){
+                    var j = parseInt(this.rid)
+                    $('#second_role').datagrid("selectRow", this.rid);
+
+                })
+
+
+
+            }
+        });
+
+
+    }
+
+    assign2_role();
+
+    //分配角色
+    function toAssignRoles() {
+
+        var user2 = $('#first_User').datagrid('getSelected');
+
+        if (user2) {
+            $("#userAss").val(user2.account);
+            $("#userIda").val(user2.id);
+            var rl = rolesAll("",user2,0);
+            var rln = rl.split(",");
+            //清空数据
+            $("#second_role").datagrid("unselectAll");
+            //获取加载后的全部数据
+            var roles = $("#second_role").datagrid("getRows");
+            for (var i = 0; i < roles.length; i++) {
+                for (var j=0;j<rln.length;j++) {
+
+                    if (roles[i].rname == rln[j]) {
+                        $("#second_role").datagrid("selectRow",i);
+                    }
+                }
+            }
+
+            $("#window_role_assign").window("open");
+
+        } else {
+            $.messager.alert("系统提示","请选择分配角色的用户");
+        }
+
+    }
+
+    function assign_Role() {
+
+        var user2 = $('#first_User').datagrid('getSelected');
+        var role2 = $("#second_role").datagrid('getSelections');
+
+        var rids="";
+        for (var i=0;i<role2.length;i++) {
+            rids += role2[i].rid + ",";
+        }
+
+        $.ajax({
+            url:"assignUserRoles",
+            method:"post",
+            data:{"id":user2.id,"rid":rids},
+            dataType:"json",
+            success:function(data) {
+
+                init_user();
+
+                $("#window_role_assign").window("close");
+            }
+
+        })
+
+       /* $("#form_role_assign").form("submit",{
+            success:function(d) {
+
+                init_user();
+
+                $("#window_role_assign").window("close");
+            }
+        })*/
+
+    }
+
+
+</script>
